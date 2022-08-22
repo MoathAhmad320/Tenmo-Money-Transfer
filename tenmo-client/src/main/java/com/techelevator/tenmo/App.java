@@ -88,7 +88,7 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-        accountService.displayBalance(accountService.retrieveAccountById(currentUser,currentUser.getUser().getId()));
+        accountService.displayBalance(accountService.retrieveAccountByUserId(currentUser,currentUser.getUser().getId()));
 	}
 
 	private void viewTransferHistory() {

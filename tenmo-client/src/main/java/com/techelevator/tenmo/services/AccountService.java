@@ -48,6 +48,21 @@ public class AccountService {
         return account;
     }
 
+    public Account retrieveAccountByUserId(AuthenticatedUser user, long id) {
+        Account account = null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<Account> response =
+                    restTemplate.exchange(baseUrl + "accounts/user/" + id, HttpMethod.GET, entity, Account.class);
+            account = response.getBody();
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+        return account;
+    }
+
     public void displayBalance(Account account){
         System.out.println("Your current amount balance is : $" + account.getBalance());
 

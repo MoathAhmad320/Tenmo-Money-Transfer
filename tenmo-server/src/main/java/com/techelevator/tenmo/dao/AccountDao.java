@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface AccountDao {
 
+    Account retrieveAccountById (long id);
     Account retrieveAccountByUserId (long id);
     List<Account> listAccounts();
 }

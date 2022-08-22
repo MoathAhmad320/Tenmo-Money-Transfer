@@ -22,9 +22,9 @@ public class JdbcAccountDao implements AccountDao{
     }
 
     @Override
-    public Account retrieveAccountByUserId(long id) {
+    public Account retrieveAccountById(long id) {
         Account account = new Account();
-        String sql = "SELECT account_id, user_id, balance FROM account WHERE user_id = ?;";
+        String sql = "SELECT account_id, user_id, balance FROM account WHERE account_id = ?;";
         SqlRowSet rowset = jdbcTemplate.queryForRowSet(sql,id);
         if(rowset.next()){
            account = mapRowToAccount(rowset);
@@ -32,6 +32,19 @@ public class JdbcAccountDao implements AccountDao{
             System.out.println("error mapping account by id");
         }
 return account;
+    }
+
+    @Override
+    public Account retrieveAccountByUserId(long id) {
+        Account account = new Account();
+        String sql = "SELECT account_id, user_id, balance FROM account WHERE user_id = ?;";
+        SqlRowSet rowset = jdbcTemplate.queryForRowSet(sql,id);
+        if(rowset.next()){
+            account = mapRowToAccount(rowset);
+        } else {
+            System.out.println("error mapping account by id");
+        }
+        return account;
     }
 
     @Override
