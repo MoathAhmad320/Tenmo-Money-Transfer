@@ -46,6 +46,14 @@ public class Account {
         Balance = balance;
     }
 
+    public void increaseBalance(BigDecimal balance) {
+        Balance = Balance.add(balance);
+    }
+
+    public void decreaseBalance(BigDecimal balance) {
+        Balance = Balance.subtract(balance);
+    }
+
 
 
 }
