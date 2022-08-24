@@ -1,10 +1,7 @@
 package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.*;
-import com.techelevator.tenmo.services.AccountService;
-import com.techelevator.tenmo.services.AuthenticationService;
-import com.techelevator.tenmo.services.ConsoleService;
-import com.techelevator.tenmo.services.TransferService;
+import com.techelevator.tenmo.services.*;
 
 import java.math.BigDecimal;
 
@@ -14,6 +11,7 @@ public class App {
 
     private final ConsoleService consoleService = new ConsoleService();
     private final AccountService accountService = new AccountService(API_BASE_URL);
+    private final UserService userService = new UserService(API_BASE_URL);
     private final TransferService transferService = new TransferService(API_BASE_URL);
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
 
@@ -90,26 +88,44 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-        accountService.displayBalance(accountService.retrieveAccountByUserId(currentUser,currentUser.getUser().getId()));
+        accountService.displayBalance(accountService.retrieveAccountByUserId(currentUser.getUser().getId()));
 	}
 
 	private void viewTransferHistory() {
-//		 TODO Auto-generated method stub
-        for(User x:accountService.listUsers()){
-            System.out.println(x.getId());
+        transferService.displayTransferHistory(accountService.retrieveAccountByUserId(currentUser.getUser().getId()));
+        System.out.println("****************************************************");
+        int transferId = consoleService.promptForInt("Enter transfer id to view transfer details or enter 0 to return to main menu:");
+        if(transferId==0){
+            mainMenu();
+        } else {
+            transferService.displayTransferDetails(transferId);
+            consoleService.pause();
+            viewTransferHistory();
         }
-		
+
 	}
 
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
-		
+        for(Transfer x: transferService.transfersByUser(currentUser.getUser().getId(),transferService.listTransfers())){
+            System.out.println(x.getToAccount()+" "+x.getFromAccount());
+        }
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
-		
-	}
+//        System.out.println(1);
+//        System.out.println(accountService.retrieveAccountById(2002).getAccountId());
+//        System.out.println(2);
+//        System.out.println(accountService.retrieveAccountByUserId(currentUser.getUser().getId()).getAccountId());
+//        System.out.println(3);
+//        System.out.println(accountService.retrieveAccountById(2002).getAuthenticatedUser().getUser().getUsername());
+//        System.out.println(4);
+//        System.out.println(accountService.retrieveAccountByUserId(currentUser.getUser().getId()).getAuthenticatedUser().getUser().getUsername());
+//        System.out.println(5);
+        System.out.println("here"+accountService.retrieveAccountByUserId(1003).getAccountId());
+        System.out.println("then"+userService.retrieveUserById(1003).getUsername());
+//        System.out.println(userService.retrieveUserById(1003).getUser().getUsername());
+
+    }
 
 	private void requestBucks() {
 		// TODO Auto-generated method stub

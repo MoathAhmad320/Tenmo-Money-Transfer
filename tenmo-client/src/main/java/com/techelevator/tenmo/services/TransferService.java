@@ -30,13 +30,14 @@ public class TransferService {
         this.transfer = transfer;
     }
 
-    public List<Transfer> listTransfers () {
+    public static List<Transfer> listTransfers () {
+        RestTemplate restTemplate1 = new RestTemplate();
         List<Transfer> transfers= new ArrayList<>();
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Transfer[]> response =
-                    restTemplate.exchange(baseUrl + "transfers", HttpMethod.GET, entity, Transfer[].class);
+                    restTemplate1.exchange("http://localhost:8080/transfers", HttpMethod.GET, entity, Transfer[].class);
             transfers = Arrays.asList(response.getBody());
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
@@ -44,18 +45,19 @@ public class TransferService {
         return transfers;
     }
 
-    public Transfer retrieveTransferById(AuthenticatedUser user, long id) {
+    public static Transfer retrieveTransferById(long id) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
+        RestTemplate restTemplate1 = new RestTemplate();
+        Transfer transferByID = new Transfer();
         try {
             ResponseEntity<Transfer> response =
-                    restTemplate.exchange(baseUrl + "transfers/" + id, HttpMethod.GET, entity, Transfer.class);
-            transfer = response.getBody();
+                    restTemplate1.exchange("http://localhost:8080/transfers/" + id, HttpMethod.GET, entity, Transfer.class);
+            transferByID = response.getBody();
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
-        return transfer;
+        return transferByID;
     }
 
 
@@ -72,7 +74,48 @@ public class TransferService {
         }
         return success;
     }
+public List<Transfer> transfersByUser(long id, List<Transfer> transferList){
+        List<Transfer> transfers = new ArrayList<>();
+        for(Transfer x: transferList){
+            if(id==x.getToAccount()||id==x.getFromAccount()){
+                transfers.add(x);
+            }
+        }
+return transfers;
+}
+public void displayTransferHistory(Account userAccount){
+        AccountService accountService = new AccountService("http://localhost:8080/");
+    System.out.print("\n\n***********************************************************\n");
+    System.out.println("Transfer History");
+    System.out.println("***********************************************************");
+    System.out.println();
+    System.out.printf("%20s, %30s, %20s,%n","Transfer Id", "From/To", "Amount");
+    System.out.println("***********************************************************");
+    for(Transfer x:listTransfers()){
+        System.out.printf("%20s, %30s, %20s,%n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
+                "TO: "+accountService.retrieveAccountById(x.getToAccount()).getUser().getUsername():
+                "FROM: "+accountService.retrieveAccountById(x.getFromAccount()).getUser().getUsername())
+                , "$"+x.getAmount());
+    }}
 
+    public void displayTransferDetails (int id){
+        AccountService accountService = new AccountService("http://localhost:8080/");
+        transfer = retrieveTransferById(id);
+        String status ="";
+        if(transfer.getStatus()==1){status="PENDING";
+        } else if (transfer.getStatus()==2) {status="APPROVED";}
+            else if(transfer.getStatus()==3){status="REJECTED";
+        }
+        System.out.println();
+        System.out.printf("%20s, %n","Transfer Details");
+        System.out.println("***************************************");
+        System.out.println("ID: "+transfer.getId());
+        System.out.println("FROM: "+accountService.retrieveAccountById(transfer.getFromAccount()).getUser().getUsername());
+        System.out.println("TO: "+accountService.retrieveAccountById(transfer.getToAccount()).getUser().getUsername());
+        System.out.println("TYPE: "+(transfer.getType()==1?"REQUEST":"SEND"));
+        System.out.println("STATUS: "+status);
+        System.out.println("AMOUNT: "+transfer.getAmount());
 
+    }
 
 }

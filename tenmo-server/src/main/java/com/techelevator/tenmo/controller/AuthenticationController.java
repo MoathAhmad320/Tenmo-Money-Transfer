@@ -56,10 +56,16 @@ public class AuthenticationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registration failed.");
         }
     }
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<User> listUsers(){
-       return userDao.findAll();
-    }
+//    @RequestMapping(value = "/users", method = RequestMethod.GET)
+//    public List<User> listUsers(){
+//       return userDao.findAll();
+//    }
+//
+//    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+//    public User retrieveUserById(@PathVariable long id){
+//        return userDao.findByUserId(id);
+//    }
+
 
     /**
      * Object to return as body in JWT Authentication.

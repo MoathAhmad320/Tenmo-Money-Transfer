@@ -22,7 +22,9 @@ import java.util.List;
 public class AccountService {
     private final String baseUrl;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final UserService userService = new UserService("http://localhost:8080/");
     private Account account;
+
 
     public AccountService(String url) {
         this.baseUrl = url;
@@ -51,28 +53,16 @@ public class AccountService {
         return accounts;
     }
 
-    public List<User> listUsers (){
-        List<User> users = new ArrayList<>();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-        try {
-            ResponseEntity<User[]> response =
-                    restTemplate.exchange(baseUrl + "users", HttpMethod.GET, entity, User[].class);
-            users = Arrays.asList(response.getBody());
-        } catch (RestClientResponseException | ResourceAccessException e) {
-            BasicLogger.log(e.getMessage());
-        }
-        return users;
-    }
 
-    public Account retrieveAccountById(AuthenticatedUser user, long id) {
+
+    public Account retrieveAccountById(long id) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
+            account.setUser(userService.retrieveUserById(account.getUserId()));
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
@@ -81,14 +71,14 @@ public class AccountService {
 
 
 
-    public Account retrieveAccountByUserId(AuthenticatedUser user, long id) {
+    public Account retrieveAccountByUserId(long id) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/user/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
+            account.setUser(userService.retrieveUserById(id));
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
@@ -96,8 +86,11 @@ public class AccountService {
     }
 
     public void displayBalance(Account account){
-        System.out.println("Your current amount balance is : $" + account.getBalance());
+        System.out.println("\n\n**************************************************"+
+                "\nYour current amount balance is : $" + account.getBalance()+
+        "\n**************************************************");
     }
+
 
     public void adjustBalance (Account toAccount, Account fromAccount, BigDecimal balance){
         toAccount.increaseBalance(balance);
