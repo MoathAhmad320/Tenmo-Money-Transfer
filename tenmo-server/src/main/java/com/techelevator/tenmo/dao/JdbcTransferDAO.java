@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -53,13 +54,21 @@ public class JdbcTransferDAO implements TransferDAO{
     public boolean create(long toAccount, long fromAccount, int type, int status, BigDecimal amount) {
 
         String sql = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                "VALUES (?, ?, ?,?,?);";
+                "VALUES (?, ?, ?,?,?) RETURNING transfer_id;";
         try {
             jdbcTemplate.queryForObject(sql, Long.class, type, status, fromAccount, toAccount, amount);
         } catch (DataAccessException e) {
             return false;
         }
         return true;
+    }
+
+    public void updateTransfer (Transfer transfer, long id) {
+        String sql = "UPDATE transfer SET transfer_id = ?, transfer_type_id = ?, transfer_status_id = ?, account_from = ?, account_to = ?, amount = ? WHERE transfer_id = ?;";
+        int rowsupdated = jdbcTemplate.update(sql,transfer.getId(),transfer.getType(),transfer.getStatus(),transfer.getFromAccount(),transfer.getToAccount(),transfer.getAmount(),id);
+        if(rowsupdated != 1){
+            System.out.println("error updating account by id");
+        }
     }
 
     private Transfer mapRowToTransfer(SqlRowSet rs) {

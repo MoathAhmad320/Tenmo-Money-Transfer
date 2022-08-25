@@ -1,0 +1,5 @@
+2022-08-25T07:01:58.7131965 401 : [{"timestamp":"2022-08-25T11:01:58.664+00:00","status":401,"error":"Unauthorized","message":"User 0 was not found.","path":"/users/0"}]
+2022-08-25T07:02:00.8044331 401 : [{"timestamp":"2022-08-25T11:02:00.802+00:00","status":401,"error":"Unauthorized","message":"User 100 was not found.","path":"/users/100"}]
+2022-08-25T07:18:22.6344964 401 : [no body]
+2022-08-25T07:19:59.1841764 401 : [no body]
+2022-08-25T07:44:07.1327837 401 : [no body]

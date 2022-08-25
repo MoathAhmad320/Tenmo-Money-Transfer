@@ -85,6 +85,21 @@ public class AccountService {
         return account;
     }
 
+    public static Account updateAccount(Account account, long id) {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Account> entity = new HttpEntity<>( account,headers);
+        RestTemplate restTemplate1 = new RestTemplate();
+        try {
+            ResponseEntity<Account> response =
+                    restTemplate1.exchange("http://localhost:8080/accounts/" +id, HttpMethod.PUT, entity, Account.class);
+            account = response.getBody();
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+        return account;
+    }
+
+
     public void displayBalance(Account account){
         System.out.println("\n\n**************************************************"+
                 "\nYour current amount balance is : $" + account.getBalance()+
@@ -95,5 +110,7 @@ public class AccountService {
     public void adjustBalance (Account toAccount, Account fromAccount, BigDecimal balance){
         toAccount.increaseBalance(balance);
         fromAccount.decreaseBalance(balance);
+        updateAccount(toAccount,toAccount.getAccountId());
+        updateAccount(fromAccount,fromAccount.getAccountId());
     }
 }

@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.services;
 
+import com.techelevator.tenmo.App;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.Transfer;
@@ -9,6 +10,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,13 +63,14 @@ public class TransferService {
     }
 
 
-    public boolean create(Transfer transfer){
+    public static boolean create(Transfer transfer){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Transfer> entity = new HttpEntity<>(transfer,headers);
         boolean success = false;
+        RestTemplate restTemplate1 = new RestTemplate();
         try {
-            restTemplate.exchange(baseUrl + "transfers", HttpMethod.POST, entity, Transfer.class);
+            restTemplate1.exchange("http://localhost:8080/transfers", HttpMethod.POST, entity, Transfer.class);
             success = true;
         }catch(RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
@@ -83,6 +86,47 @@ public List<Transfer> transfersByUser(long id, List<Transfer> transferList){
         }
 return transfers;
 }
+
+    public static Transfer updateTransfer(Transfer transfer, long id) {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Transfer> entity = new HttpEntity<>( transfer,headers);
+        RestTemplate restTemplate1 = new RestTemplate();
+        try {
+            ResponseEntity<Transfer> response =
+                    restTemplate1.exchange("http://localhost:8080/transfers/" +id, HttpMethod.PUT, entity, Transfer.class);
+            transfer = response.getBody();
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+        return transfer;
+    }
+public void sendTransfer(Account toAccount, Account fromAccount, BigDecimal amount){
+        AccountService accountService = new AccountService("http://localhost:8080/");
+       if ((amount.doubleValue()>0) && (amount.doubleValue()<=fromAccount.getBalance().doubleValue())){
+            Transfer newTransfer = new Transfer(1, fromAccount.getAccountId(), toAccount.getAccountId(),2,2,amount);
+            create(newTransfer);
+            accountService.adjustBalance(toAccount,fromAccount,amount);
+            System.out.println("TE Bucks were successfully Sent");
+        } else {
+           System.out.println();
+            System.out.println("Not enough TE Bucks in account to perform transaction");
+            accountService.displayBalance(fromAccount);
+           System.out.println();
+           System.out.println("Returning to main menu");
+        }}
+
+    public void requestTransfer(Account toAccount, Account fromAccount, BigDecimal amount){
+        if (amount.doubleValue()>0){
+            Transfer newTransfer = new Transfer(1, fromAccount.getAccountId(), toAccount.getAccountId(),1,1,amount);
+            create(newTransfer);
+            System.out.println("TE Bucks request successfully sent");
+        } else {
+            System.out.println();
+            System.out.println("Please enter a valid amount");
+        }}
+
+
+
 public void displayTransferHistory(Account userAccount){
         AccountService accountService = new AccountService("http://localhost:8080/");
     System.out.print("\n\n***********************************************************\n");
@@ -92,11 +136,29 @@ public void displayTransferHistory(Account userAccount){
     System.out.printf("%20s, %30s, %20s,%n","Transfer Id", "From/To", "Amount");
     System.out.println("***********************************************************");
     for(Transfer x:listTransfers()){
+        if(((userAccount.getAccountId()==x.getFromAccount()) || (userAccount.getAccountId()==x.getToAccount()))&& (x.getType()==2))
         System.out.printf("%20s, %30s, %20s,%n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
                 "TO: "+accountService.retrieveAccountById(x.getToAccount()).getUser().getUsername():
                 "FROM: "+accountService.retrieveAccountById(x.getFromAccount()).getUser().getUsername())
                 , "$"+x.getAmount());
     }}
+
+    public void displayPendingTransfers(Account userAccount){
+        AccountService accountService = new AccountService("http://localhost:8080/");
+        System.out.print("\n\n***********************************************************\n");
+        System.out.println("Pending Transfer Requests");
+        System.out.println("***********************************************************");
+        System.out.println();
+        System.out.printf("%20s, %30s, %20s,%n","Transfer Id", "To/From", "Amount");
+        System.out.println("***********************************************************");
+        for(Transfer x:listTransfers()){
+            if(((userAccount.getAccountId()==x.getFromAccount()) || (userAccount.getAccountId()==x.getToAccount()))&& (x.getType()==1))
+            System.out.printf("%20s, %30s, %20s,%n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
+                            "SEND TO: "+accountService.retrieveAccountById(x.getToAccount()).getUser().getUsername():
+                            "REQUESTED FROM: "+accountService.retrieveAccountById(x.getFromAccount()).getUser().getUsername())
+                    , "$"+x.getAmount());
+        }}
+
 
     public void displayTransferDetails (int id){
         AccountService accountService = new AccountService("http://localhost:8080/");

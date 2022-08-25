@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +59,13 @@ return account;
             }
             return accounts;
         }
-
+    public void updateAccount (Account account,long id) {
+        String sql = "UPDATE account SET account_id = ?, user_id = ?, balance = ? WHERE account_id = ?;";
+        int rowsupdated = jdbcTemplate.update(sql,account.getAccountId(),account.getUserId(),account.getBalance(),id);
+        if(rowsupdated != 1){
+            System.out.println("error updating account by id");
+        }
+    }
 
     private Account mapRowToAccount(SqlRowSet rs) {
         Account account = new Account();

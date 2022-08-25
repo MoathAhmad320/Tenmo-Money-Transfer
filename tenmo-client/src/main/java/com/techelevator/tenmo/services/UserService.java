@@ -58,7 +58,16 @@ public class UserService {
         System.out.printf("%15s, %20s,%n", "User Id", "Name");
         System.out.println("**************************************************");
         for(User x:users){
+            if(!user.getUser().getUsername().equals(x.getUsername())){
             System.out.format("%15s, %20s, %n", x.getId(),x.getUsername());
-        }
+        }}}
+
+    public boolean validateId(long userId, long checkId, List<User> users){
+        boolean status = false;
+        for( User x: users)
+            if((!(x.getId().equals(userId))) && (x.getId().equals(checkId))){
+                status = true;
+            }
+        return status;
     }
 }
