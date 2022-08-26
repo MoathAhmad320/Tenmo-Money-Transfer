@@ -1,0 +1,2 @@
+2022-08-26T07:40:02.3969475 401 : [{"timestamp":"2022-08-26T11:40:02.348+00:00","status":401,"error":"Unauthorized","message":"User 0 was not found.","path":"/users/0"}]
+2022-08-26T07:40:05.7719304 401 : [{"timestamp":"2022-08-26T11:40:05.771+00:00","status":401,"error":"Unauthorized","message":"User 5 was not found.","path":"/users/5"}]

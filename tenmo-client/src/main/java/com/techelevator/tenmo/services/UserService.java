@@ -24,9 +24,10 @@ public class UserService {
         this.baseUrl = baseUrl;
     }
 
-    public List<User> listUsers (){
+    public List<User> listUsers (AuthenticatedUser user){
         List<User> users = new ArrayList<>();
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<User[]> response =
@@ -39,8 +40,10 @@ public class UserService {
     }
 
 
-    public User retrieveUserById(long id) {
+    public User retrieveUserById(AuthenticatedUser user, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         User newUser = new User();
         try {

@@ -39,9 +39,10 @@ public class AccountService {
         this.account = account;
     }
 
-    public List<Account> listAccounts () {
+    public List<Account> listAccounts (AuthenticatedUser user) {
         List<Account> accounts= new ArrayList<>();
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Account[]> response =
@@ -55,14 +56,15 @@ public class AccountService {
 
 
 
-    public Account retrieveAccountById(long id) {
+    public Account retrieveAccountById(AuthenticatedUser user, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
-            account.setUser(userService.retrieveUserById(account.getUserId()));
+            account.setUser(userService.retrieveUserById(user, account.getUserId()));
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
@@ -71,22 +73,24 @@ public class AccountService {
 
 
 
-    public Account retrieveAccountByUserId(long id) {
+    public Account retrieveAccountByUserId(AuthenticatedUser user, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/user/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
-            account.setUser(userService.retrieveUserById(id));
+            account.setUser(userService.retrieveUserById(user,id));
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return account;
     }
 
-    public static Account updateAccount(Account account, long id) {
+    public static Account updateAccount(AuthenticatedUser user, Account account, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Account> entity = new HttpEntity<>( account,headers);
         RestTemplate restTemplate1 = new RestTemplate();
         try {
@@ -107,10 +111,10 @@ public class AccountService {
     }
 
 
-    public void adjustBalance (Account toAccount, Account fromAccount, BigDecimal balance){
+    public void adjustBalance (AuthenticatedUser user, Account toAccount, Account fromAccount, BigDecimal balance){
         toAccount.increaseBalance(balance);
         fromAccount.decreaseBalance(balance);
-        updateAccount(toAccount,toAccount.getAccountId());
-        updateAccount(fromAccount,fromAccount.getAccountId());
+        updateAccount(user, toAccount,toAccount.getAccountId());
+        updateAccount(user, fromAccount,fromAccount.getAccountId());
     }
 }

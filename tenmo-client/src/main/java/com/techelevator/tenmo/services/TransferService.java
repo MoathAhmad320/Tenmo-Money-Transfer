@@ -33,10 +33,11 @@ public class TransferService {
         this.transfer = transfer;
     }
 
-    public static List<Transfer> listTransfers () {
+    public static List<Transfer> listTransfers (AuthenticatedUser user) {
         RestTemplate restTemplate1 = new RestTemplate();
         List<Transfer> transfers= new ArrayList<>();
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Transfer[]> response =
@@ -48,8 +49,9 @@ public class TransferService {
         return transfers;
     }
 
-    public static Transfer retrieveTransferById(long id) {
+    public static Transfer retrieveTransferById(AuthenticatedUser user, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         RestTemplate restTemplate1 = new RestTemplate();
         Transfer transferByID = new Transfer();
@@ -64,9 +66,10 @@ public class TransferService {
     }
 
 
-    public static boolean create(Transfer transfer){
+    public static boolean create(AuthenticatedUser user, Transfer transfer){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Transfer> entity = new HttpEntity<>(transfer,headers);
         boolean success = false;
         RestTemplate restTemplate1 = new RestTemplate();
@@ -88,8 +91,9 @@ public List<Transfer> transfersByUser(long id, List<Transfer> transferList){
 return transfers;
 }
 
-    public static Transfer updateTransfer(Transfer transfer, long id) {
+    public static Transfer updateTransfer(AuthenticatedUser user, Transfer transfer, long id) {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
         HttpEntity<Transfer> entity = new HttpEntity<>( transfer,headers);
         RestTemplate restTemplate1 = new RestTemplate();
         try {
@@ -101,12 +105,12 @@ return transfers;
         }
         return transfer;
     }
-public void sendTransfer(Account toAccount, Account fromAccount, BigDecimal amount){
+public void sendTransfer(AuthenticatedUser user, Account toAccount, Account fromAccount, BigDecimal amount){
         AccountService accountService = new AccountService("http://localhost:8080/");
        if ((amount.doubleValue()>0) && (amount.doubleValue()<=fromAccount.getBalance().doubleValue())){
             Transfer newTransfer = new Transfer(1, fromAccount.getAccountId(), toAccount.getAccountId(),2,2,amount);
-            create(newTransfer);
-            accountService.adjustBalance(toAccount,fromAccount,amount);
+            create(user, newTransfer);
+            accountService.adjustBalance(user, toAccount,fromAccount,amount);
             System.out.println("TE Bucks were successfully Sent");
         } else {
            System.out.println();
@@ -116,10 +120,10 @@ public void sendTransfer(Account toAccount, Account fromAccount, BigDecimal amou
            System.out.println("Returning to main menu");
         }}
 
-    public void requestTransfer(Account toAccount, Account fromAccount, BigDecimal amount){
+    public void requestTransfer(AuthenticatedUser user, Account toAccount, Account fromAccount, BigDecimal amount){
         if (amount.doubleValue()>0){
             Transfer newTransfer = new Transfer(1, fromAccount.getAccountId(), toAccount.getAccountId(),1,1,amount);
-            create(newTransfer);
+            create(user, newTransfer);
             System.out.println("TE Bucks request successfully sent");
         } else {
             System.out.println();
@@ -128,7 +132,7 @@ public void sendTransfer(Account toAccount, Account fromAccount, BigDecimal amou
 
 
 
-public void displayTransferHistory(Account userAccount, List<Transfer> list){
+public void displayTransferHistory(AuthenticatedUser user, Account userAccount, List<Transfer> list){
         AccountService accountService = new AccountService("http://localhost:8080/");
     System.out.print("\n\n***********************************************************\n");
     System.out.println("Transfer History");
@@ -139,12 +143,12 @@ public void displayTransferHistory(Account userAccount, List<Transfer> list){
     for(Transfer x:list){
         if(!(x.getType()==1 && userAccount.getAccountId().equals(x.getFromAccount()))){
         System.out.printf("%20s, %20s, %20s, %20s, %n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
-                "TO: "+accountService.retrieveAccountById(x.getToAccount()).getUser().getUsername():
-                "FROM: "+accountService.retrieveAccountById(x.getFromAccount()).getUser().getUsername())
+                "TO: "+accountService.retrieveAccountById(user, x.getToAccount()).getUser().getUsername():
+                "FROM: "+accountService.retrieveAccountById(user, x.getFromAccount()).getUser().getUsername())
                 , "$"+x.getAmount(), (x.getType()==1?"REQUEST":"SENT"));
     }}}
 
-    public void displayPending(Account userAccount, List<Transfer> list){
+    public void displayPending(AuthenticatedUser user, Account userAccount, List<Transfer> list){
         AccountService accountService = new AccountService("http://localhost:8080/");
         System.out.print("\n\n***********************************************************\n");
         System.out.println("Pending Transfers");
@@ -155,13 +159,13 @@ public void displayTransferHistory(Account userAccount, List<Transfer> list){
         for(Transfer x:list){
             if(x.getType()==1 && x.getStatus()==1 && userAccount.getAccountId().equals(x.getFromAccount())){
                 System.out.printf("%20s, %20s, %20s, %n",x.getId(),
-                                "TO: "+accountService.retrieveAccountById(x.getToAccount()).getUser().getUsername(),"$"+x.getAmount());
+                                "TO: "+accountService.retrieveAccountById(user,x.getToAccount()).getUser().getUsername(),"$"+x.getAmount());
             }}}
 
 
-    public void displayTransferDetails (int id){
+    public void displayTransferDetails (AuthenticatedUser user, int id){
         AccountService accountService = new AccountService("http://localhost:8080/");
-        transfer = retrieveTransferById(id);
+        transfer = retrieveTransferById(user, id);
         String status ="";
         if(transfer.getStatus()==1){status="PENDING";
         } else if (transfer.getStatus()==2) {status="APPROVED";}
@@ -171,8 +175,8 @@ public void displayTransferHistory(Account userAccount, List<Transfer> list){
         System.out.printf("%20s, %n","Transfer Details");
         System.out.println("***************************************");
         System.out.println("ID: "+transfer.getId());
-        System.out.println("FROM: "+accountService.retrieveAccountById(transfer.getFromAccount()).getUser().getUsername());
-        System.out.println("TO: "+accountService.retrieveAccountById(transfer.getToAccount()).getUser().getUsername());
+        System.out.println("FROM: "+accountService.retrieveAccountById(user, transfer.getFromAccount()).getUser().getUsername());
+        System.out.println("TO: "+accountService.retrieveAccountById(user, transfer.getToAccount()).getUser().getUsername());
         System.out.println("TYPE: "+(transfer.getType()==1?"REQUEST":"SEND"));
         System.out.println("STATUS: "+status);
         System.out.println("AMOUNT: "+transfer.getAmount());
@@ -188,23 +192,23 @@ public void displayTransferHistory(Account userAccount, List<Transfer> list){
         return status;
     }
 
-    public void pendingResponse (int response, Transfer pendingTransfer){
+    public void pendingResponse (AuthenticatedUser user, int response, Transfer pendingTransfer){
         AccountService accountService = new AccountService("http://localhost:8080/");
         Account toAccount = new Account();
         Account fromAccount = new Account();
         if (response == 1) {
             pendingTransfer.setStatus(2);
             pendingTransfer.setType(2);
-            updateTransfer(pendingTransfer,pendingTransfer.getId());
-            toAccount = accountService.retrieveAccountById(pendingTransfer.getToAccount());
-            fromAccount = accountService.retrieveAccountById(pendingTransfer.getFromAccount());
-            accountService.adjustBalance(toAccount,fromAccount,pendingTransfer.getAmount());
+            updateTransfer(user, pendingTransfer,pendingTransfer.getId());
+            toAccount = accountService.retrieveAccountById(user, pendingTransfer.getToAccount());
+            fromAccount = accountService.retrieveAccountById(user, pendingTransfer.getFromAccount());
+            accountService.adjustBalance(user, toAccount,fromAccount,pendingTransfer.getAmount());
         } else if (response == 2) {
             pendingTransfer.setStatus(3);
-            updateTransfer(pendingTransfer, pendingTransfer.getId());
-            toAccount = accountService.retrieveAccountById(pendingTransfer.getToAccount());
-            fromAccount = accountService.retrieveAccountById(pendingTransfer.getFromAccount());
-            accountService.adjustBalance(toAccount, fromAccount, new BigDecimal(0));
+            updateTransfer(user, pendingTransfer, pendingTransfer.getId());
+            toAccount = accountService.retrieveAccountById(user, pendingTransfer.getToAccount());
+            fromAccount = accountService.retrieveAccountById(user, pendingTransfer.getFromAccount());
+            accountService.adjustBalance(user, toAccount, fromAccount, new BigDecimal(0));
         } else{
             System.out.println("Invalid Entry");}
     }
