@@ -96,11 +96,14 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-        transferService.displayTransferHistory(currentAccount);
+        transferService.displayTransferHistory(currentAccount,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers()));
         System.out.println("****************************************************");
         int transferId = consoleService.promptForInt("Enter transfer id to view transfer details or enter 0 to return to main menu:");
         if(transferId==0){
             mainMenu();
+        } else if (!transferService.validateTransferId(transferId,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers()))) {
+            System.out.println("Invalid selection, Please enter a valid Transfer Id");
+            viewTransferHistory();
         } else {
             transferService.displayTransferDetails(transferId);
             consoleService.pause();
@@ -110,19 +113,27 @@ public class App {
 	}
 
 	private void viewPendingRequests() {
-
-        transferService.displayPendingTransfers(currentAccount);
+        transferService.displayPending(currentAccount,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers()));
         System.out.println("****************************************************");
-        int transferId = consoleService.promptForInt("Enter transfer id to view transfer details or enter 0 to return to main menu:");
+        int transferId = consoleService.promptForInt("Enter transfer id to respond to pending transfer or enter 0 to return to main menu:");
         if(transferId==0){
             mainMenu();
+        } else if (!transferService.validateTransferId(transferId,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers()))) {
+            System.out.println("Invalid selection, Please enter a valid Transfer Id");
+            viewPendingRequests();
         } else {
             transferService.displayTransferDetails(transferId);
-            consoleService.pause();
-            viewPendingRequests();
+            transferService.displayResponse();
+            int response = consoleService.promptForInt("Please choose an option:");
+            if (response == 0) {
+                mainMenu();
+            } else {
+
+                Transfer transfer = TransferService.retrieveTransferById(transferId);
+                transferService.pendingResponse(response, transfer);
+                System.out.println("Pending Transfer successfully responded to");
+            }
         }
-
-
     }
 	private void sendBucks() {
 userService.displayUsers(currentUser,userService.listUsers());
