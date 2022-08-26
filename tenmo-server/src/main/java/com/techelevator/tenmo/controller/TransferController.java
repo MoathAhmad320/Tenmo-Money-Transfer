@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @RestController
@@ -32,7 +33,7 @@ public class TransferController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void create(@RequestBody Transfer transfer) {
+    public void create(@Valid @RequestBody Transfer transfer) {
         transferDAO.create(transfer.getToAccount(), transfer.getFromAccount(), transfer.getType(), transfer.getStatus(), transfer.getAmount());
     }
 
@@ -41,7 +42,7 @@ public class TransferController {
         return transferDAO.retrieveTransferById(id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PutMapping(value = "/{id}")
     public void update(@Valid @PathVariable long id, @RequestBody Transfer transfer) {
         transferDAO.updateTransfer(transfer, id);
 

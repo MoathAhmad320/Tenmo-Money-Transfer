@@ -34,16 +34,14 @@ public class AccountController {
         return accountDao.retrieveAccountById(id);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public List<Account> listAccounts(){
         return accountDao.listAccounts();
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PutMapping(value = "/{id}")
     public void update(@Valid @PathVariable long id, @RequestBody Account account) {
         accountDao.updateAccount(account, id);
-//        if (!userDao.create(newUser.getUsername(), newUser.getPassword())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registration failed.");
         }
 
 }
