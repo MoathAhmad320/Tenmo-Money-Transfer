@@ -116,8 +116,7 @@ public void sendTransfer(AuthenticatedUser user, Account toAccount, Account from
            System.out.println();
             System.out.println("Not enough TE Bucks in account to perform transaction");
             accountService.displayBalance(fromAccount);
-           System.out.println();
-           System.out.println("Returning to main menu");
+
         }}
 
     public void requestTransfer(AuthenticatedUser user, Account toAccount, Account fromAccount, BigDecimal amount){
@@ -134,19 +133,21 @@ public void sendTransfer(AuthenticatedUser user, Account toAccount, Account from
 
 public void displayTransferHistory(AuthenticatedUser user, Account userAccount, List<Transfer> list){
         AccountService accountService = new AccountService("http://localhost:8080/");
-    System.out.print("\n\n***********************************************************\n");
-    System.out.println("Transfer History");
-    System.out.println("***********************************************************");
+    System.out.print("\n\n************************************************************************************\n");
+    System.out.printf("%47s,%n","Transfer History");
+    System.out.println("************************************************************************************");
     System.out.println();
-    System.out.printf("%20s, %20s, %20s, %20s,%n","Transfer Id", "From/To", "Amount","TYPE");
-    System.out.println("***********************************************************");
+    System.out.printf("%1s, %15s, %20s, %20s,%n","Transfer Id", "From/To", "Amount","Type");
+    System.out.println("************************************************************************************");
     for(Transfer x:list){
         if(!(x.getType()==1 && userAccount.getAccountId().equals(x.getFromAccount()))){
-        System.out.printf("%20s, %20s, %20s, %20s, %n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
+        System.out.printf("%1s, %23s, %20s, %20s, %n",x.getId(),(userAccount.getAccountId()==x.getFromAccount()?
                 "TO: "+accountService.retrieveAccountById(user, x.getToAccount()).getUser().getUsername():
                 "FROM: "+accountService.retrieveAccountById(user, x.getFromAccount()).getUser().getUsername())
                 , "$"+x.getAmount(), (x.getType()==1?"REQUEST":"SENT"));
-    }}}
+    }}
+    System.out.println("************************************************************************************");
+}
 
     public void displayPending(AuthenticatedUser user, Account userAccount, List<Transfer> list){
         AccountService accountService = new AccountService("http://localhost:8080/");
@@ -172,7 +173,7 @@ public void displayTransferHistory(AuthenticatedUser user, Account userAccount, 
             else if(transfer.getStatus()==3){status="REJECTED";
         }
         System.out.println();
-        System.out.printf("%20s, %n","Transfer Details");
+        System.out.printf("%28s, %n","Transfer Details");
         System.out.println("***************************************");
         System.out.println("ID: "+transfer.getId());
         System.out.println("FROM: "+accountService.retrieveAccountById(user, transfer.getFromAccount()).getUser().getUsername());
