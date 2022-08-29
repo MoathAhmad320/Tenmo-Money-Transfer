@@ -94,91 +94,95 @@ public class App {
 
 	private void viewCurrentBalance() {
         accountService.displayBalance(currentAccount);
+
 	}
 
 	private void viewTransferHistory() {
+        int transferId=-1;
+        while(transferId!=0){
         transferService.displayTransferHistory(currentUser,currentAccount,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers(currentUser)));
-        int transferId = consoleService.promptForInt("Enter transfer id to view transfer details or enter 0 to return to main menu:");
+        transferId = consoleService.promptForInt("Enter transfer id to view transfer details or enter 0 to return to main menu:");
         if(transferId==0){
-            mainMenu();
+           break;
         } else if (!transferService.validateTransferId(transferId,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers(currentUser)))) {
             System.out.println();
             System.out.println("Invalid selection, Please enter a valid Transfer Id");
-return;        } else {
+continue;        } else {
             transferService.displayTransferDetails(currentUser,transferId);
-    }
-
-	}
+            break;
+    }}return;}
 
 	private void viewPendingRequests() {
+        int transferId = -1;
+        while(transferId!=0){
         transferService.displayPending(currentUser, currentAccount,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers(currentUser)));
         System.out.println("****************************************************");
-        int transferId = consoleService.promptForInt("Enter transfer id to respond to pending transfer or enter 0 to return to main menu:");
+        transferId = consoleService.promptForInt("Enter transfer id to respond to pending transfer or enter 0 to return to main menu:");
         if(transferId==0){
-            mainMenu();
+            break;
         } else if (!transferService.validateTransferId(transferId,transferService.transfersByUser(currentAccount.getAccountId(),TransferService.listTransfers(currentUser)))) {
             System.out.println();
             System.out.println("Invalid selection, Please enter a valid Transfer Id");
-return;
+continue;
         } else {
             transferService.displayTransferDetails(currentUser, transferId);
             transferService.displayResponse();
             int response = consoleService.promptForInt("Please choose an option:");
             if (response == 0) {
-                mainMenu();
+                continue;
             } else {
-
                 Transfer transfer = TransferService.retrieveTransferById(currentUser,transferId);
-                transferService.pendingResponse(currentUser, response, transfer);
+                if(transferService.pendingResponse(currentUser, response, transfer)){
                 System.out.println("Pending Transfer successfully responded to");
-            }
+                break;
+            } else { continue;
         }
-    }
+    }}}return;}
+
 	private void sendBucks() {
-userService.displayUsers(currentUser,userService.listUsers(currentUser));
 int userId = -1;
 while(userId!=0){
-userId = consoleService.promptForInt("Please enter the User Id you wish to send TE Bucks to (Enter 0 to cancel): ");
+    userService.displayUsers(currentUser,userService.listUsers(currentUser));
+    userId = consoleService.promptForInt("Please enter the User Id you wish to send TE Bucks to (Enter 0 to cancel): ");
 if (userId==0){break;
 } else if (!userService.validateId(currentUser.getUser().getId(),userId,userService.listUsers(currentUser))) {
     System.out.println();
     System.out.println("Invalid selection, Please enter a valid User Id");
     continue;
-}
+} else{
         Account toAccount = accountService.retrieveAccountByUserId(currentUser,userId);
 BigDecimal amount = consoleService.promptForBigDecimal("Please enter the amount of TE Bucks you wish to send (Enter 0 to cancel): ");
-if(amount.intValue()==0){sendBucks();
+if(amount.intValue()==0){continue;
 } else if (amount.doubleValue()<=0){
     System.out.println();
             System.out.println("Negative numbers not allowed, Please try again with a valid amount");
-            break;
+            continue;
 } else {
     transferService.sendTransfer(currentUser, toAccount, currentAccount, amount);
-    break;
-}}}
+break;}}}return;}
 
 	private void requestBucks() {
-        userService.displayUsers(currentUser,userService.listUsers(currentUser));
         int userId = -1;
         while (userId!=0){
-        userId = consoleService.promptForInt("Please enter the User Id you wish to request TE Bucks from (Enter 0 to cancel): ");
+            userService.displayUsers(currentUser,userService.listUsers(currentUser));
+            userId = consoleService.promptForInt("Please enter the User Id you wish to request TE Bucks from (Enter 0 to cancel): ");
         if (userId==0){break;
         } else if (!userService.validateId(currentUser.getUser().getId(),userId,userService.listUsers(currentUser))) {
             System.out.println();
             System.out.println("Invalid selection, Please enter a valid User Id");
         continue;
-        }
+        } else {
         Account fromAccount = accountService.retrieveAccountByUserId(currentUser,userId);
         BigDecimal amount = consoleService.promptForBigDecimal("Please enter the amount of TE Bucks you wish to request (Enter 0 to cancel): ");
-        if(amount.intValue()==0){break;
+        if(amount.intValue()==0){continue;
         } else if (amount.doubleValue()<=0){
             System.out.println();
             System.out.println("Negative numbers not allowed, Please try again with a valid amount");
-        break;
+        continue;
         } else {
             transferService.requestTransfer(currentUser, currentAccount,fromAccount,amount);
             break;
         }
-	}}
+	}}return;}
 
 }

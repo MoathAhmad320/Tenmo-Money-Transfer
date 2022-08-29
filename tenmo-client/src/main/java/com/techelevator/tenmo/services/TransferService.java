@@ -152,14 +152,15 @@ public void displayTransferHistory(AuthenticatedUser user, Account userAccount, 
     public void displayPending(AuthenticatedUser user, Account userAccount, List<Transfer> list){
         AccountService accountService = new AccountService("http://localhost:8080/");
         System.out.print("\n\n***********************************************************\n");
-        System.out.println("Pending Transfers");
+        System.out.printf("%30s","Pending Transfers");
+        System.out.println();
         System.out.println("***********************************************************");
         System.out.println();
-        System.out.printf("%20s, %20s, %20s,%n","Transfer Id", "To", "Amount");
+        System.out.printf("%-20s %-20s %-20s %n","Transfer Id", "To", "Amount");
         System.out.println("***********************************************************");
         for(Transfer x:list){
             if(x.getType()==1 && x.getStatus()==1 && userAccount.getAccountId().equals(x.getFromAccount())){
-                System.out.printf("%20s, %20s, %20s, %n",x.getId(),
+                System.out.printf("%-20s %-20s %-20s %n",x.getId(),
                                 "TO: "+accountService.retrieveAccountById(user,x.getToAccount()).getUser().getUsername(),"$"+x.getAmount());
             }}}
 
@@ -173,7 +174,7 @@ public void displayTransferHistory(AuthenticatedUser user, Account userAccount, 
             else if(transfer.getStatus()==3){status="REJECTED";
         }
         System.out.println();
-        System.out.printf("%28s, %n","Transfer Details");
+        System.out.printf("%28s %n","Transfer Details");
         System.out.println("***************************************");
         System.out.println("ID: "+transfer.getId());
         System.out.println("FROM: "+accountService.retrieveAccountById(user, transfer.getFromAccount()).getUser().getUsername());
@@ -193,25 +194,33 @@ public void displayTransferHistory(AuthenticatedUser user, Account userAccount, 
         return status;
     }
 
-    public void pendingResponse (AuthenticatedUser user, int response, Transfer pendingTransfer){
+    public boolean pendingResponse (AuthenticatedUser user, int response, Transfer pendingTransfer){
         AccountService accountService = new AccountService("http://localhost:8080/");
         Account toAccount = new Account();
         Account fromAccount = new Account();
+        boolean answer = false;
         if (response == 1) {
-            pendingTransfer.setStatus(2);
-            pendingTransfer.setType(2);
-            updateTransfer(user, pendingTransfer,pendingTransfer.getId());
-            toAccount = accountService.retrieveAccountById(user, pendingTransfer.getToAccount());
             fromAccount = accountService.retrieveAccountById(user, pendingTransfer.getFromAccount());
-            accountService.adjustBalance(user, toAccount,fromAccount,pendingTransfer.getAmount());
+            if (fromAccount.getBalance().doubleValue()>=pendingTransfer.getAmount().doubleValue()) {
+                pendingTransfer.setStatus(2);
+                pendingTransfer.setType(2);
+                updateTransfer(user, pendingTransfer, pendingTransfer.getId());
+                toAccount = accountService.retrieveAccountById(user, pendingTransfer.getToAccount());
+                accountService.adjustBalance(user, toAccount, fromAccount, pendingTransfer.getAmount());
+                answer = true;
+            } else {
+                System.out.println("Not enough T.E. Bucks in account to approve transfer");
+            }
         } else if (response == 2) {
             pendingTransfer.setStatus(3);
             updateTransfer(user, pendingTransfer, pendingTransfer.getId());
             toAccount = accountService.retrieveAccountById(user, pendingTransfer.getToAccount());
             fromAccount = accountService.retrieveAccountById(user, pendingTransfer.getFromAccount());
             accountService.adjustBalance(user, toAccount, fromAccount, new BigDecimal(0));
+            answer = true;
         } else{
-            System.out.println("Invalid Entry");}
+            System.out.println("Invalid Entry");
+        answer = false;} return answer;
     }
 
     public void displayResponse(){

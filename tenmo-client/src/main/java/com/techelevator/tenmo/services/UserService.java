@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class UserService {
@@ -57,12 +58,14 @@ public class UserService {
     }
 
     public void displayUsers(AuthenticatedUser user, List<User> users){
-        System.out.printf("%n,%n","**************************************************");
-        System.out.printf("%15s, %20s,%n", "User Id", "Name");
+
+        System.out.print("**************************************************\n");
+        System.out.printf("%-15s %-20s %n", "User Id", "Name");
         System.out.println("**************************************************");
         for(User x:users){
             if(!user.getUser().getUsername().equals(x.getUsername())){
-            System.out.format("%15s, %20s, %n", x.getId(),x.getUsername());
+            System.out.format("%-15s %-20s %n", x.getId(),x.getUsername());
+
         }}}
 
     public boolean validateId(long userId, long checkId, List<User> users){
