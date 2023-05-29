@@ -47,8 +47,8 @@ public class AccountService {
         try {
             ResponseEntity<Account[]> response =
                     restTemplate.exchange(baseUrl + "accounts", HttpMethod.GET, entity, Account[].class);
-            accounts = Arrays.asList(response.getBody());
-        } catch (RestClientResponseException | ResourceAccessException e) {
+            accounts = Arrays.asList(response.getBody());}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return accounts;
@@ -64,8 +64,8 @@ public class AccountService {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
-            account.setUser(userService.retrieveUserById(user, account.getUserId()));
-        } catch (RestClientResponseException | ResourceAccessException e) {
+            account.setUser(userService.retrieveUserById(user, account.getUserId()));}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return account;
@@ -81,8 +81,8 @@ public class AccountService {
             ResponseEntity<Account> response =
                     restTemplate.exchange(baseUrl + "accounts/user/" + id, HttpMethod.GET, entity, Account.class);
             account = response.getBody();
-            account.setUser(userService.retrieveUserById(user,id));
-        } catch (RestClientResponseException | ResourceAccessException e) {
+            account.setUser(userService.retrieveUserById(user,id));}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return account;
@@ -96,8 +96,8 @@ public class AccountService {
         try {
             ResponseEntity<Account> response =
                     restTemplate1.exchange("http://localhost:8080/accounts/" +id, HttpMethod.PUT, entity, Account.class);
-            account = response.getBody();
-        } catch (RestClientResponseException | ResourceAccessException e) {
+            account = response.getBody();}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return account;
@@ -106,8 +106,8 @@ public class AccountService {
 
     public void displayBalance(Account account){
         System.out.println("\n\n**************************************************"+
-                "\nYour current amount balance is : $" + account.getBalance()+
-        "\n**************************************************");
+                            "\nYour current amount balance is : $" + account.getBalance()+
+                            "\n**************************************************");
     }
 
 

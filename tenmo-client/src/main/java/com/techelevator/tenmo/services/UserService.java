@@ -33,8 +33,8 @@ public class UserService {
         try {
             ResponseEntity<User[]> response =
                     restTemplate.exchange(baseUrl + "users", HttpMethod.GET, entity, User[].class);
-            users = Arrays.asList(response.getBody());
-        } catch (RestClientResponseException | ResourceAccessException e) {
+            users = Arrays.asList(response.getBody());}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return users;
@@ -50,8 +50,8 @@ public class UserService {
         try {
             ResponseEntity<User> response =
                     restTemplate.exchange(baseUrl + "users/" + id, HttpMethod.GET, entity, User.class);
-           newUser = response.getBody();
-        } catch (RestClientResponseException | ResourceAccessException e) {
+           newUser = response.getBody();}
+        catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
         return newUser;

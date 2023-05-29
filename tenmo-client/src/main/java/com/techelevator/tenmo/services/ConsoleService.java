@@ -61,8 +61,8 @@ public class ConsoleService {
         System.out.print(prompt);
         while (true) {
             try {
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
+                return Integer.parseInt(scanner.nextLine());}
+            catch (NumberFormatException e) {
                 System.out.println("Please enter a number.");
             }
         }
@@ -72,8 +72,8 @@ public class ConsoleService {
         System.out.print(prompt);
         while (true) {
             try {
-                return new BigDecimal(scanner.nextLine());
-            } catch (NumberFormatException e) {
+                return new BigDecimal(scanner.nextLine());}
+            catch (NumberFormatException e) {
                 System.out.println("Please enter a decimal number.");
             }
         }
